@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生压力与心理健康调查问卷 | Student Mental Health Survey</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-light: #e8eef7;
+            --accent: #e07a5f;
+            --text: #2d3748;
+            --text-muted: #718096;
+            --bg: #f7fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --success: #48bb78;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--card);
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        header h1 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        header .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            margin: 20px 0 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .question-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .question-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .question-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        .q-number {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+        .q-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .q-title-en {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-bottom: 18px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            position: relative;
+        }
+        .option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .option label {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--card);
+        }
+        .option label:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        .option input[type="radio"]:checked + label {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .option label::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .option input[type="radio"]:checked + label::before {
+            border-color: var(--primary);
+            background: var(--primary);
+            box-shadow: inset 0 0 0 4px var(--card);
+        }
+        .option .text { font-size: 0.95rem; }
+        .option .text-en {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-left: 6px;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover { background: #3d5d8a; }
+        .btn-secondary {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: var(--bg); }
+        .result-panel {
+            display: none;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+            margin-top: 20px;
+        }
+        .result-panel h2 {
+            color: var(--success);
+            margin-bottom: 12px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+        .summary-table th, .summary-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .summary-table th {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .score-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        .score-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent);
+        }
+        .export-area {
+            margin-top: 20px;
+        }
+        .export-area textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+        .hint {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+        @media (max-width: 600px) {
+            .question-card { padding: 20px; }
+            header h1 { font-size: 1.3rem; }
+            .actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>学生压力与心理健康调查问卷</h1>
+            <div class="subtitle">Student Pressure & Mental Health Survey</div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </header>
+
+        <form id="surveyForm">
+            <!-- Q1 -->
+            <div class="question-card" data-q="1">
+                <span class="q-number">Q1</span>
+                <div class="q-title">学业任务与考试压力</div>
+                <div class="q-title-en">Academic Workload & Exam Pressure</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1_1" value="1" required>
+                        <label for="q1_1"><span class="text">无压力</span><span class="text-en">/ None</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1_2" value="2">
+                        <label for="q1_2"><span class="text">轻度</span><span class="text-en">/ Mild</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1_3" value="3">
+                        <label for="q1_3"><span class="text">中度</span><span class="text-en">/ Moderate</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1_4" value="4">
+                        <label for="q1_4"><span class="text">较大</span><span class="text-en">/ High</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1_5" value="5">
+                        <label for="q1_5"><span class="text">极大</span><span class="text-en">/ Extreme</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="question-card" data-q="2">
+                <span class="q-number">Q2</span>
+                <div class="q-title">家庭期望与沟通模式</div>
+                <div class="q-title-en">Family Expectations & Communication</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2_1" value="1" required>
+                        <label for="q2_1"><span class="text">完全不会</span><span class="text-en">/ Not at all</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2_2" value="2">
+                        <label for="q2_2"><span class="text">轻微</span><span class="text-en">/ Slightly</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2_3" value="3">
+                        <label for="q2_3"><span class="text">一定程度</span><span class="text-en">/ Moderately</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2_4" value="4">
+                        <label for="q2_4"><span class="text">较大程度</span><span class="text-en">/ Quite a bit</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2_5" value="5">
+                        <label for="q2_5"><span class="text">极大程度</span><span class="text-en">/ Extremely</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="question-card" data-q="3">
+                <span class="q-number">Q3</span>
+                <div class="q-title">同辈竞争与社交比较</div>
+                <div class="q-title-en">Peer Competition & Social Comparison</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3_1" value="1" required>
+                        <label for="q3_1"><span class="text">从不</span><span class="text-en">/ Never</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3_2" value="2">
+                        <label for="q3_2"><span class="text">偶尔</span><span class="text-en">/ Occasionally</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3_3" value="3">
+                        <label for="q3_3"><span class="text">有时</span><span class="text-en">/ Sometimes</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3_4" value="4">
+                        <label for="q3_4"><span class="text">经常</span><span class="text-en">/ Often</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3_5" value="5">
+                        <label for="q3_5"><span class="text">总是</span><span class="text-en">/ Always</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="question-card" data-q="4">
+                <span class="q-number">Q4</span>
+                <div class="q-title">未来不确定性</div>
+                <div class="q-title-en">Future Uncertainty</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4_1" value="1" required>
+                        <label for="q4_1"><span class="text">完全不是</span><span class="text-en">/ Not at all</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4_2" value="2">
+                        <label for="q4_2"><span class="text">不太是</span><span class="text-en">/ Rarely</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4_3" value="3">
+                        <label for="q4_3"><span class="text">一般</span><span class="text-en">/ Neutral</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4_4" value="4">
+                        <label for="q4_4"><span class="text">比较是</span><span class="text-en">/ Often</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4_5" value="5">
+                        <label for="q4_5"><span class="text">完全是</span><span class="text-en">/ Definitely</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="question-card" data-q="5">
+                <span class="q-number">Q5</span>
+                <div class="q-title">数字环境与信息过载</div>
+                <div class="q-title-en">Digital Environment & Information Overload</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5_1" value="1" required>
+                        <label for="q5_1"><span class="text">完全没有</span><span class="text-en">/ Not at all</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5_2" value="2">
+                        <label for="q5_2"><span class="text">轻微</span><span class="text-en">/ Slightly</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5_3" value="3">
+                        <label for="q5_3"><span class="text">中等</span><span class="text-en">/ Moderately</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5_4" value="4">
+                        <label for="q5_4"><span class="text">较强</span><span class="text-en">/ Strongly</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5_5" value="5">
+                        <label for="q5_5"><span class="text">极强</span><span class="text-en">/ Extremely</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="question-card" data-q="6">
+                <span class="q-number">Q6</span>
+                <div class="q-title">核心压力源判定（单选）</div>
+                <div class="q-title-en">Primary Stressor Identification (Select one)</div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6_1" value="学业负担与考试" required>
+                        <label for="q6_1"><span class="text">学业负担与考试</span><span class="text-en">/ Academic burden & exams</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6_2" value="家庭期望与亲子关系">
+                        <label for="q6_2"><span class="text">家庭期望与亲子关系</span><span class="text-en">/ Family expectations</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6_3" value="同辈竞争与社交关系">
+                        <label for="q6_3"><span class="text">同辈竞争与社交关系</span><span class="text-en">/ Peer competition & social relationships</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6_4" value="未来规划迷茫">
+                        <label for="q6_4"><span class="text">未来规划迷茫</span><span class="text-en">/ Future planning uncertainty</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6_5" value="网络/社交媒体影响">
+                        <label for="q6_5"><span class="text">网络/社交媒体影响</span><span class="text-en">/ Internet & social media influence</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6_6" value="学校制度与环境氛围">
+                        <label for="q6_6"><span class="text">学校制度与环境氛围</span><span class="text-en">/ School system & environment</span></label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q6" id="q6_7" value="其他">
+                        <label for="q6_7"><span class="text">其他</span><span class="text-en">/ Other</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn-primary">提交问卷 / Submit</button>
+                <button type="button" class="btn-secondary" onclick="resetForm()">重置 / Reset</button>
+            </div>
+        </form>
+
+        <div class="result-panel" id="resultPanel">
+            <h2>✅ 提交成功！Submitted Successfully</h2>
+            <p>以下是你的回答摘要 / Here is your response summary:</p>
+            <table class="summary-table" id="summaryTable">
+                <thead>
+                    <tr><th>维度 / Dimension</th><th>得分 / Score</th><th>可视化 / Visual</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="export-area">
+                <p style="font-size:0.9rem;margin-bottom:8px;"><strong>复制以下 CSV 数据用于汇总分析 / Copy CSV data for analysis:</strong></p>
+                <textarea id="csvOutput" readonly></textarea>
+            </div>
+        </div>
+
+        <p class="hint">本问卷不收集任何个人身份信息。This survey does not collect any personal identity information.</p>
+    </div>
+
+    <script>
+        const form = document.getElementById('surveyForm');
+        const progressFill = document.getElementById('progressFill');
+        const resultPanel = document.getElementById('resultPanel');
+        const questions = ['q1','q2','q3','q4','q5','q6'];
+        const labels = {
+            q1: '学业任务与考试压力 / Academic Workload',
+            q2: '家庭期望与沟通模式 / Family Expectations',
+            q3: '同辈竞争与社交比较 / Peer Competition',
+            q4: '未来不确定性 / Future Uncertainty',
+            q5: '数字环境与信息过载 / Digital Environment',
+            q6: '核心压力源 / Primary Stressor'
+        };
+
+        function updateProgress() {
+            let answered = 0;
+            questions.forEach(q => {
+                if (form.querySelector(`input[name="${q}"]:checked`)) answered++;
+            });
+            progressFill.style.width = (answered / questions.length * 100) + '%';
+        }
+
+        form.addEventListener('change', updateProgress);
+
+        // Highlight active card
+        form.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const card = this.closest('.question-card');
+                card.classList.add('active');
+            });
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = {};
+            questions.forEach(q => {
+                const selected = form.querySelector(`input[name="${q}"]:checked`);
+                data[q] = selected ? selected.value : '';
+            });
+
+            // Build summary table
+            const tbody = document.querySelector('#summaryTable tbody');
+            tbody.innerHTML = '';
+            let csv = 'Dimension,Score\n';
+
+            questions.slice(0,5).forEach(q => {
+                const score = parseInt(data[q]) || 0;
+                const pct = (score / 5 * 100).toFixed(0);
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${labels[q]}</td><td>${score} / 5</td><td><div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div></td>`;
+                tbody.appendChild(row);
+                csv += `${labels[q]},${score}\n`;
+            });
+
+            // Q6 special
+            const q6Row = document.createElement('tr');
+            q6Row.innerHTML = `<td><strong>${labels.q6}</strong></td><td colspan="2"><strong>${data.q6}</strong></td>`;
+            tbody.appendChild(q6Row);
+            csv += `${labels.q6},${data.q6}\n`;
+
+            // Calculate highest factor from Q1-Q5
+            let maxScore = 0, maxFactor = '';
+            questions.slice(0,5).forEach(q => {
+                const s = parseInt(data[q]) || 0;
+                if (s > maxScore) { maxScore = s; maxFactor = labels[q]; }
+            });
+
+            const factorRow = document.createElement('tr');
+            factorRow.innerHTML = `<td><strong>最高压力维度 / Top Factor</strong></td><td colspan="2"><strong>${maxFactor} (${maxScore}/5)</strong></td>`;
+            tbody.appendChild(factorRow);
+
+            document.getElementById('csvOutput').value = csv;
+            resultPanel.style.display = 'block';
+            resultPanel.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        function resetForm() {
+            form.reset();
+            updateProgress();
+            resultPanel.style.display = 'none';
+            document.querySelectorAll('.question-card').forEach(c => c.classList.remove('active'));
+        }
+    </script>
+</body>
+</html>
